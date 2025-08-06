@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Filter, BookOpen, Calendar, Hash, ChevronDown, ChevronRight } from "lucide-react";
+import { Search, BookOpen, Calendar, Hash, ChevronDown, ChevronRight } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -13,7 +13,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -45,19 +44,15 @@ const statutes = [
   }
 ];
 
-const categories = ["Securities Law", "Tax Law", "Civil Rights", "Contract Law", "Criminal Law"];
-
 export function StatuteSidebar() {
   const { state } = useSidebar();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(["recent"]));
 
   const filteredStatutes = statutes.filter(statute => {
     const matchesSearch = statute.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          statute.section.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !selectedCategory || statute.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    return matchesSearch;
   });
 
   const toggleGroup = (groupId: string) => {
@@ -83,29 +78,14 @@ export function StatuteSidebar() {
         )}
         
         {!isCollapsed && (
-          <div className="space-y-3">
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search statutes..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
-              />
-            </div>
-            
-            <div className="flex flex-wrap gap-1">
-              {categories.map((category) => (
-                <Badge
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "secondary"}
-                  className="text-xs cursor-pointer"
-                  onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
-                >
-                  {category}
-                </Badge>
-              ))}
-            </div>
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search statutes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8"
+            />
           </div>
         )}
       </SidebarHeader>
@@ -120,7 +100,7 @@ export function StatuteSidebar() {
               <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-accent">
                 <span className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  {!isCollapsed && "Recent"}
+                  {!isCollapsed && "Recent Statutes"}
                 </span>
                 {!isCollapsed && (
                   expandedGroups.has("recent") ? 
@@ -156,58 +136,6 @@ export function StatuteSidebar() {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
-
-        <Collapsible 
-          open={expandedGroups.has("categories")}
-          onOpenChange={() => toggleGroup("categories")}
-        >
-          <SidebarGroup>
-            <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-accent">
-                <span className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  {!isCollapsed && "Categories"}
-                </span>
-                {!isCollapsed && (
-                  expandedGroups.has("categories") ? 
-                    <ChevronDown className="h-4 w-4" /> : 
-                    <ChevronRight className="h-4 w-4" />
-                )}
-              </SidebarGroupLabel>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {categories.map((category) => {
-                    const count = statutes.filter(s => s.category === category).length;
-                    return (
-                      <SidebarMenuItem key={category}>
-                        <SidebarMenuButton 
-                          onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
-                          className={selectedCategory === category ? "bg-accent" : ""}
-                          tooltip={isCollapsed ? category : undefined}
-                        >
-                          <div className="flex items-center justify-between w-full">
-                            {!isCollapsed ? (
-                              <>
-                                <span className="text-sm">{category}</span>
-                                <Badge variant="secondary" className="text-xs">
-                                  {count}
-                                </Badge>
-                              </>
-                            ) : (
-                              <Filter className="h-4 w-4" />
-                            )}
-                          </div>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  })}
                 </SidebarMenu>
               </SidebarGroupContent>
             </CollapsibleContent>
